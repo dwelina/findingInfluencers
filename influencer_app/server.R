@@ -20,6 +20,21 @@ top_words_perTopic <- reactive({
             )
   
     })
+
+    output$plot2 <- renderPlot({
+    
+    set.seed(200)
+
+    channel_cors %>%
+      filter(correlation > .5) %>%
+      graph_from_data_frame() %>%
+      ggraph(layout = "fr") +
+      geom_edge_link(aes(alpha = correlation, width = correlation)) +
+      geom_node_point(size = 6, color = "lightblue") +
+      geom_node_text(aes(label = name), repel = TRUE) +
+      theme_void()
+  
+    })
   
 
 }

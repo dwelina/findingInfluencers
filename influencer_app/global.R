@@ -1,6 +1,5 @@
 library(shiny)
 library(data.table)
-library(dplyr)
 library(foreach)
 library(readr)
 library(qdap)
@@ -11,11 +10,18 @@ library(topicmodels)
 library(ggplot2)
 library(tibble)
 library(ggpubr)
+library(tidytext)
+library(widyr)
+library(ggraph)
+library(igraph)
 
 # Navigate to a working directory where you have you Shiny files and data
 
-data <- read_csv("youtube_dataEN.csv")
-data <- as.data.frame(data) 
+
+#data <- read_csv("youtube_dataEN.csv")
+#data <- as.data.frame(data)
+data <- read_csv("/Users/pcraisan/Desktop/rwds/Shiny/findingInfluencers/youtube_dataEN.csv")
+
 
 # Hoping to do some text mining on the data so will need to clean unwanted things like URLs and punctuation
 
@@ -62,3 +68,21 @@ top_terms <- tidy_lda %>%
   arrange(topic, -beta)
 
 top_terms$topic <- factor(top_terms$topic)
+
+# Get channel name and tags
+channel_tokens <- data[, c(13,10)]
+
+channel_tokens$tags <- gsub("\"", " ", channel_tokens$tags)
+channel_tokens$tags <- gsub(",", " ", channel_tokens$tags)
+
+channel_tokens <- channel_tokens %>%
+	unnest_tokens(tag, tags)
+	
+tokens_by_channel <- channel_tokens %>%
+  count(channel_title, tag, sort = TRUE) %>%
+  ungroup()
+  
+channel_cors <- tokens_by_channel %>%
+  pairwise_cor(channel_title, tag, n, sort = TRUE)
+
+head(channel_cors)
