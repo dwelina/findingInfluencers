@@ -25,6 +25,13 @@ top_words_perTopic <- reactive({
     
     set.seed(200)
 
+    data_ss <- reactive({
+        subset(data, topic==input$topic)
+    
+    })
+
+    channel_cors <- getChannelCors(data_ss())
+
     channel_cors %>%
       filter(correlation > .5) %>%
       graph_from_data_frame() %>%
@@ -34,6 +41,21 @@ top_words_perTopic <- reactive({
       geom_node_text(aes(label = name), repel = TRUE) +
       theme_void()
   
+    })
+
+    # Show the first "n" observations
+    output$table1 <- renderTable({
+
+        set.seed(200)
+
+    data_ss <- reactive({
+        subset(data, topic==input$topic)
+    
+    })
+
+    #data_ss() <- data_ss()[order(-data_ss()$subscriber_count),]
+    head(data_ss(), n = 10)
+
     })
   
 

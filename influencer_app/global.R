@@ -58,6 +58,13 @@ video_dtm.new   <- video_dtm[rowTotals> 0, ]
 # Find topics using LDA
 video_lda <- LDA(video_dtm.new, k = 6, control = list(seed = 123))
 
+# Get topic with the highest probability for each video and add this information to original data
+video_lda.topics <- as.matrix(topics(video_lda))
+video_lda.topics <- as.data.frame(video_lda.topics)
+video_lda.topics <- rownames_to_column(video_lda.topics, "id")
+colnames(video_lda.topics) <- c("id", "topic")
+data <- merge(data, video_lda.topics, by="id", all.x = TRUE)
+
 # Get top terms by topic to a data frame
 tidy_lda <- tidy(video_lda)
 
@@ -69,20 +76,23 @@ top_terms <- tidy_lda %>%
 
 top_terms$topic <- factor(top_terms$topic)
 
-# Get channel name and tags
-channel_tokens <- data[, c(13,10)]
+# Get channel name and tags and calculate correlations
 
-channel_tokens$tags <- gsub("\"", " ", channel_tokens$tags)
-channel_tokens$tags <- gsub(",", " ", channel_tokens$tags)
+getChannelCors <- function(data_ss){
+  	channel_tokens <- data_ss[, c(13,10)]
 
-channel_tokens <- channel_tokens %>%
-	unnest_tokens(tag, tags)
-	
-tokens_by_channel <- channel_tokens %>%
-  count(channel_title, tag, sort = TRUE) %>%
-  ungroup()
+	channel_tokens$tags <- gsub("\"", " ", channel_tokens$tags)
+	channel_tokens$tags <- gsub(",", " ", channel_tokens$tags)
+
+	channel_tokens <- channel_tokens %>%
+		unnest_tokens(tag, tags)
+		
+	tokens_by_channel <- channel_tokens %>%
+	  count(channel_title, tag, sort = TRUE) %>%
+	  ungroup()
+	  
+	channel_cors <- tokens_by_channel %>%
+	  pairwise_cor(channel_title, tag, n, sort = TRUE)
   
-channel_cors <- tokens_by_channel %>%
-  pairwise_cor(channel_title, tag, n, sort = TRUE)
-
-head(channel_cors)
+  return(channel_cors)
+}

@@ -8,6 +8,7 @@ pageWithSidebar(
   
   mainPanel(
     plotOutput('plot1'),
-    plotOutput('plot2')
+    plotOutput('plot2'),
+    tableOutput('table1')
   )
 )
