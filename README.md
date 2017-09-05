@@ -41,5 +41,25 @@ To run the app ypu can use a Docker container with the RStudio image
 
 `docker run --rm -p 8787:8787 -e ROOT=TRUE rocker/verse:3.3.2`
 
+- Go to http://<your_IP_address>: 8787 to log into RStudio (user/pwd both rstudio)
+- Set up the GitHub repository by navigating to File -> New project ->Version control->Git and adding https://github.com/dwelina/findingInfluencers as a project
+- Now we need to additional Linux packages. Run in RStudio:
+```
+#Get a list of packages
+system("sudo apt-get update")
+#Install GSL to run topicmodels
+system("sudo apt-get install -y libgsl0-dev")
+#Install udunits2
+system("sudo apt-get install -y libudunits2-dev")
+```
 
-
+- Install some needed R packages in RStudio:
+```
+packages_to_install <- c("widyr","foreach","qdap","topicmodels","tidytext","ggpubr","ggraph", dependencies=T)
+install.packages(packages_to_install)
+```
+- Start R shiny and run the app:
+```
+library(shiny)
+runApp("influencer_app")
+```
