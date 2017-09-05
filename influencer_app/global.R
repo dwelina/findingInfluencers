@@ -17,10 +17,7 @@ library(igraph)
 
 # Navigate to a working directory where you have you Shiny files and data
 
-
-#data <- read_csv("youtube_dataEN.csv")
-#data <- as.data.frame(data)
-data <- read_csv("/Users/pcraisan/Desktop/rwds/Shiny/findingInfluencers/youtube_dataEN.csv")
+data <- read_csv("youtube_dataEN.csv")
 
 
 # Hoping to do some text mining on the data so will need to clean unwanted things like URLs and punctuation
