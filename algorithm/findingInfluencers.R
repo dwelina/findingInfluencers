@@ -110,16 +110,22 @@ channelTopics <- dataAggregated[order(dataAggregated$channel_id, -abs(dataAggreg
 channelTopics <- channelTopics[!duplicated(channelTopics$channel_id), ] # take the first row within each id
 channelTopics <- na.omit(channelTopics)
 
-# Get subscribercounts for a channel
-channelTopics$subscription_count <- lapply(channelTopics$channel_id, function(x){
-  get_channel_stats(x)$statistics$subscriberCount
-}) 
+# Get statistics for a channel - this takes a while once again depending on amount of rows
+channelTopics$statistics <- lapply(channelTopics$channel_id, function(x){
+  get_channel_stats(x)$statistics
+})
+
+# Get values from a nested list
+channelTopics$channel_title <- lapply(channelTopics$statistics, function(x) x[4]$snippet$localized$title)
+channelTopics$subscription_count <- lapply(channelTopics$statistics, function(x) x[5]$statistics$subscriberCount)
 
 # Get data for top10 channels by subscription count for each topic
 channelTopics$subscription_count <- as.integer(channelTopics$subscription_count)
 channelTopics <- channelTopics[order(-channelTopics$subscription_count), ]
 channelTopics_top10 <- by(channelTopics, channelTopics["topic"], head, n=10)
-channelTopics_top10 <- Reduce(rbind, channelTopics_top9)
+channelTopics_top10 <- Reduce(rbind, channelTopics_top10)
+
+# Posting to an imaginary API
 
 # Choose a topic and POST to API using httr
 topic_number <- "2"
