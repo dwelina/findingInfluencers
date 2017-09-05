@@ -30,5 +30,16 @@ Further development:
 -	Add more info to the result set such as percentile of subscriber count for a region, geographical analysis of subscribers etc.
 -	Ultimately design the whole thing for user interaction and recode as a production ready service
 
+## Running the app in the repository
+
+Note! The app uses a small ready dataset in the same folder as the app (.CSV-file).
+
+To run the app ypu can use a Docker container with the RStudio image
+
+- Install Docker locally
+- Open terminal and create a container with RStudio image and R 3.3.2
+
+`docker run --rm -p 8787:8787 -e ROOT=TRUE rocker/verse:3.3.2`
+
 
 
