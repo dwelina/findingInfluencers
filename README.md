@@ -16,10 +16,10 @@ Topic mining using Latent Dirichlet Allocation (LDA) is applied to the descript
 
 Once we have found the channels related to a desired topic we are going to have look at the “tags” feature in the data which will contain the hashtags/tags that the creator of the video has given to the video. We will run a correlation analysis on each channel having a set of hashtags given to their video. Channels that have common tags will have a correlation between them and the more common tags channels share, the higher the correlation will be. In this way we can find clusters of channels that are creating videos that have similar tags and assumably similar games. From these clusters we can have a look at each one separately.
 
-Now that we have drilled to the desired data set that will only contain relevant channels for us it is time to focus on the numbers like
+Now that we have drilled to the desired data set that will only contain relevant channels for us it is time to focus on the numbers such as:
 -	the subscriber count of the channel
--	average sentiment of the videos = like_count/dislike_count
--	average action count = (comment_count+ like_count+ dislike_count)/view_count
+-	average sentiment of the videos = like_count/(like_count + dislike_count)
+-	average action count = (comment_count + like_count + dislike_count)/view_count
 -	etc.
 
 Further development:
