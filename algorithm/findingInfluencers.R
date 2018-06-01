@@ -17,6 +17,9 @@
 # install.packages("tibble")
 # install.packages("httr")
 
+# Set encoding
+Sys.setlocale(category = 'LC_ALL','UTF-8')
+
 # Import packages for use
 library(RPostgreSQL)
 library(tuber)
@@ -28,19 +31,21 @@ library(topicmodels)
 library(ggplot2)
 library(tibble)
 library(httr)
+library(quanteda)
+library(textcat)
 
 # Connect to PostgreSQL
 # Set up authentication
-user_name <- "<user>"
-pwd <- "<pwd>"
-database <- "<database_name>"
+user_name <- "postgres"
+pwd <- ""
+database <- "warehouse"
 
 # Set up driver to use and connect. Using default arguments for host and port since I have Postgre running locally.
 drv <- dbDriver("PostgreSQL")
 conn <- dbConnect(drv, user=user_name, password=pwd, host="localhost", port=5432, dbname=database)
 
 # Querying all YouTube data from table youtube_video_example
-data <- dbGetQuery(conn, "SELECT * FROM youtube_video_example")
+data <- dbGetQuery(conn, "SELECT * FROM youtube_video LIMIT 1000")
 
 # No need to hold the connection open so closing it as this point anymore
 dbDisconnect(conn)
@@ -52,18 +57,24 @@ data_ss <- head(data, 10000)
 data_ss$description <- gsub(" ?(f|ht)(tp)(s?)(://)(.*)[.|/](.*)", "", data_ss$description)
 data_ss$description <- gsub("[[:punct:]]", "", data_ss$description)
 data_ss$description <- gsub("[[:digit:]]", "", data_ss$description)
-data_ss$description <- Trim(clean(data_ss$description))
+#data_ss$description <- Trim(clean(data_ss$description))
+data_ss$description <- trimws(data_ss$description)
 data_ss$description <- tolower(data_ss$description)
 
 # Authentication for YouTube API called by the tuber package
-app_id <- "<your_app_id>"
-app_secret <- "your_app_secret"
+app_id <- "502603743491-e7chrdqtovmhf5q1uufpbabq2ss5m5sl.apps.googleusercontent.com"
+app_secret <- "VBIGg0oyX8RolqnpSEUJN27A"
 yt_oauth(app_id, app_secret, token = '')
 
 # Get video language and append it to the dataframe - this will take a while, be patient
 data_ss$language <- lapply(data_ss$id, function(x){
   get_video_details(x)$defaultAudioLanguage 
-}) 
+})
+
+#Using textcat
+data_ss$language <- textcat(data_ss$description)
+data_ss <- subset(data_ss, language == "english")
+
 
 # Choose only videos in English for topic mining purposes
 data_ss <- subset(data_ss, language == "en" | language == "en_US" | language == "en_GB")
@@ -76,7 +87,7 @@ vid_descriptions <- subset(vid_descriptions, desc != "")
 
 # Tokenising the descriptions
 #Uncomment if having trouble with strings being factors
-#vid_descriptions <- data.frame(lapply(vid_descriptions, as.character), stringsAsFactors=FALSE)
+vid_descriptions <- data.frame(lapply(vid_descriptions, as.character), stringsAsFactors=FALSE)
 token_counts <- vid_descriptions %>%
   unnest_tokens(tokens, desc) %>%
   anti_join(stop_words, by = c("tokens" = "word")) %>%
